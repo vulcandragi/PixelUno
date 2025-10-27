@@ -1,0 +1,15 @@
+[package]
+name = "pixel_uno"
+version = "0.1.0"
+edition = "2024"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[dependencies]
+bevy = { version = "0.17.2", features = ["wayland"] }
+bevy-inspector-egui = "0.35.0"
+bevy_asset_loader = { version = "0.24.0-rc.1", features = ["2d"] }
