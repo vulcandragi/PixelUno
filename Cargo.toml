@@ -10,6 +10,8 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy = { version = "0.17.2", features = ["wayland"] }
+bevy = { version = "0.17.2", features = ["wayland", "experimental_bevy_ui_widgets"] }
 bevy-inspector-egui = "0.35.0"
 bevy_asset_loader = { version = "0.24.0-rc.1", features = ["2d"] }
+rand = "0.10.0-rc.0"
+num_enum = "0.7.5"
