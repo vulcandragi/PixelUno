@@ -18,10 +18,12 @@ pub struct Hand {
 
 fn position_cards(hands: Query<&Hand>, mut cards: Query<&mut Transform, With<Card>>) {
     for hand in hands {
+        let total_cards = cards.count();
+
         for (i, (entity, _)) in hand.cards.iter().enumerate() {
             if let Ok(mut transform) = cards.get_mut(*entity) {
                 transform.translation.x = (50 * i) as f32;
-                transform.translation.z = i as f32;
+                transform.translation.z = (-(total_cards as f32)) + i as f32;
             }
         }
     }

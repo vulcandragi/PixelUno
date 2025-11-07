@@ -24,7 +24,7 @@ pub struct CardAssets {
     pub cards_texture: Handle<Image>,
 }
 
-#[derive(Component, Clone, Debug, PartialEq)]
+#[derive(Component, Reflect, Clone, Debug, PartialEq)]
 pub struct Card {
     pub color: CardColor,
     pub symbol: CardSymbol,
@@ -32,18 +32,26 @@ pub struct Card {
 
 impl Card {
     pub fn as_atlas_index(&self) -> usize {
+        if self.color == CardColor::Black {
+            return match self.symbol {
+                CardSymbol::Color => 60usize,
+                CardSymbol::Plus4 => 61usize,
+                _ => 62usize,
+            };
+        }
+
         if self.symbol == CardSymbol::None || self.color == CardColor::None {
-            58usize
+            63usize
         } else {
-            ((u8::from(self.color)) * u8::from(self.symbol)) as usize
+            ((u8::from(self.color)) * 15 + u8::from(self.symbol)) as usize
         }
     }
 }
 
-#[derive(IntoPrimitive, FromPrimitive, Copy, Clone, Debug, Default, PartialEq)]
+#[derive(IntoPrimitive, FromPrimitive, Reflect, Copy, Clone, Debug, Default, PartialEq)]
 #[repr(u8)]
 pub enum CardColor {
-    Blue,
+    Blue = 0,
     Yellow,
     Red,
     Green,
@@ -52,10 +60,10 @@ pub enum CardColor {
     None,
 }
 
-#[derive(IntoPrimitive, FromPrimitive, Copy, Clone, Debug, Default, PartialEq)]
+#[derive(IntoPrimitive, FromPrimitive, Reflect, Copy, Clone, Debug, Default, PartialEq)]
 #[repr(u8)]
 pub enum CardSymbol {
-    Zero,
+    Zero = 0,
     One,
     Two,
     Three,
@@ -73,6 +81,9 @@ pub enum CardSymbol {
     #[default]
     None,
 }
+
+#[derive(Component)]
+pub struct Index(usize);
 
 #[derive(EntityEvent)]
 pub struct AddCard {
@@ -105,12 +116,27 @@ fn spawn(
                         }),
                         ..default()
                     },
-                    Transform::from_xyz(0., 0., 0.),
+                    Index(0),
+                    Pickable::default(),
                 ))
+                .observe(on_over)
+                .observe(on_out)
                 .id();
 
             commands.entity(*entity).add_child(card_entity);
             hand.cards.insert(card_entity, card.clone());
         }
+    }
+}
+
+fn on_over(hover: On<Pointer<Over>>, mut query: Query<&mut Transform, With<Card>>) {
+    if let Ok(mut transform) = query.get_mut(hover.entity) {
+        transform.translation.y += 25.;
+    }
+}
+
+fn on_out(hover: On<Pointer<Out>>, mut query: Query<&mut Transform, With<Card>>) {
+    if let Ok(mut transform) = query.get_mut(hover.entity) {
+        transform.translation.y += -25.
     }
 }

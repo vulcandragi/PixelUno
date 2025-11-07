@@ -16,10 +16,7 @@ impl Plugin for GamePlugin {
                 ..default()
             }),))
             .insert_state(GameState::None)
-            .add_systems(
-                Update,
-                start_game.run_if(on_message::<LoadCompleteMessage>),
-            );
+            .add_systems(Update, start_game.run_if(on_message::<LoadCompleteMessage>));
     }
 }
 
