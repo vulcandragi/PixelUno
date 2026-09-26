@@ -1,7 +1,7 @@
 # Reformulação
 
 ## Etapa 1
-- [ ] Gerar Deck
+- [x] Gerar Deck
 - [ ] Cartas da Mão
 - [ ] Pilha do jogo
 - [ ] Jogar Cartas
