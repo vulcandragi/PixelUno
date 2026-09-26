@@ -1,7 +1,8 @@
-use crate::plugins::card::{AddCard, Card, CardColor, CardSymbol};
-use crate::plugins::game::GameState;
-use crate::plugins::load::LoadState;
-use crate::plugins::player::Player;
+use crate::old_plugins::card::{AddCard, Card, CardColor, CardSymbol};
+use crate::old_plugins::game::GameState;
+use crate::old_plugins::load::LoadState;
+use crate::old_plugins::player::Player;
+use crate::old_plugins::stack::Stack;
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 use rand::prelude::*;
@@ -91,6 +92,7 @@ fn dealing(
     mut commands: Commands,
     players: Query<Entity, With<Player>>,
     mut deck: Single<&mut Deck>,
+    stack: Single<Entity, With<Stack>>,
 ) {
     for player in players.iter() {
         for _ in 0..7 {
@@ -101,5 +103,12 @@ fn dealing(
                 })
             }
         }
+    }
+
+    if let Some(card) = deck.cards.pop() {
+        commands.trigger(AddCard {
+            entity: stack.entity(),
+            card,
+        })
     }
 }

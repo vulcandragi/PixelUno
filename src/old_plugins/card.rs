@@ -1,6 +1,8 @@
-use crate::plugins::hand::Hand;
-use crate::plugins::load::LoadState;
+use crate::old_plugins::hand::Hand;
+use crate::old_plugins::load::LoadState;
+use crate::old_plugins::stack::Stack;
 use bevy::prelude::*;
+use bevy::window::{CursorIcon, SystemCursorIcon};
 use bevy_asset_loader::prelude::*;
 use num_enum::{FromPrimitive, IntoPrimitive};
 
@@ -11,7 +13,10 @@ impl Plugin for CardPlugin {
         app.add_loading_state(
             LoadingState::new(LoadState::Loading).load_collection::<CardAssets>(),
         )
-        .add_systems(Update, spawn.run_if(on_message::<SpawnCard>))
+        .add_systems(
+            Update,
+            (spawn_hand, spawn_stack).run_if(on_message::<SpawnCard>),
+        )
         .add_message::<SpawnCard>();
     }
 }
@@ -95,48 +100,79 @@ pub struct AddCard {
 pub struct SpawnCard {
     pub entity: Entity,
     pub card: Card,
+    pub transform: Transform,
 }
 
-fn spawn(
+fn create_card(spawn_card: &SpawnCard, assets: &Res<CardAssets>) -> impl Bundle {
+    (
+        spawn_card.card.clone(),
+        Sprite {
+            image: assets.cards_texture.clone(),
+            texture_atlas: Some(TextureAtlas {
+                layout: assets.cards.clone(),
+                index: spawn_card.card.as_atlas_index(),
+            }),
+            ..default()
+        },
+        spawn_card.transform,
+    )
+}
+
+fn spawn_hand(
     mut commands: Commands,
     mut message_reader: MessageReader<SpawnCard>,
     assets: Res<CardAssets>,
     mut query: Query<&mut Hand>,
 ) {
-    for SpawnCard { entity, card } in message_reader.read() {
-        if let Ok(mut hand) = query.get_mut(*entity) {
+    for spawn in message_reader.read() {
+        if let Ok(mut hand) = query.get_mut(spawn.entity) {
             let card_entity = commands
-                .spawn((
-                    card.clone(),
-                    Sprite {
-                        image: assets.cards_texture.clone(),
-                        texture_atlas: Some(TextureAtlas {
-                            layout: assets.cards.clone(),
-                            index: card.as_atlas_index(),
-                        }),
-                        ..default()
-                    },
-                    Index(0),
-                    Pickable::default(),
-                ))
+                .spawn((create_card(spawn, &assets), Index(0), Pickable::default()))
                 .observe(on_over)
                 .observe(on_out)
                 .id();
 
-            commands.entity(*entity).add_child(card_entity);
-            hand.cards.insert(card_entity, card.clone());
+            commands.entity(spawn.entity).add_child(card_entity);
         }
     }
 }
 
-fn on_over(hover: On<Pointer<Over>>, mut query: Query<&mut Transform, With<Card>>) {
-    if let Ok(mut transform) = query.get_mut(hover.entity) {
-        transform.translation.y += 25.;
+fn spawn_stack(
+    mut commands: Commands,
+    mut message_reader: MessageReader<SpawnCard>,
+    assets: Res<CardAssets>,
+) {
+    for spawn in message_reader.read() {
+        let card_entity = commands.spawn((create_card(spawn, &assets),)).id();
+
+        commands.entity(spawn.entity).add_child(card_entity);
     }
 }
 
-fn on_out(hover: On<Pointer<Out>>, mut query: Query<&mut Transform, With<Card>>) {
+fn on_over(
+    hover: On<Pointer<Over>>,
+    mut commands: Commands,
+    mut query: Query<&mut Transform, With<Card>>,
+    window: Single<Entity, With<Window>>,
+) {
     if let Ok(mut transform) = query.get_mut(hover.entity) {
-        transform.translation.y += -25.
+        transform.translation.y += 25.;
+        commands
+            .entity(*window)
+            .insert(CursorIcon::from(SystemCursorIcon::Pointer));
+    }
+}
+
+fn on_out(
+    hover: On<Pointer<Out>>,
+    mut commands: Commands,
+    mut query: Query<&mut Transform, With<Card>>,
+    window: Single<Entity, With<Window>>,
+) {
+    if let Ok(mut transform) = query.get_mut(hover.entity) {
+        transform.translation.y += -25.;
+        commands
+            .entity(*window)
+            .insert(CursorIcon::from(SystemCursorIcon::Default));
     }
 }

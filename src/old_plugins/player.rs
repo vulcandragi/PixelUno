@@ -1,7 +1,6 @@
-use crate::plugins::card::{AddCard, SpawnCard};
-use crate::plugins::game::GameState;
-use crate::plugins::hand::Hand;
-use bevy::platform::collections::HashMap;
+use crate::old_plugins::card::{AddCard, SpawnCard};
+use crate::old_plugins::game::GameState;
+use crate::old_plugins::hand::Hand;
 use bevy::prelude::*;
 
 pub struct PlayerPlugin;
@@ -26,9 +25,7 @@ fn setup(mut commands: Commands) {
             GlobalTransform::default(),
             InheritedVisibility::default(),
             children![(
-                Hand {
-                    cards: HashMap::new(),
-                },
+                Hand,
                 Transform::from_xyz(0., -400., 0.),
                 GlobalTransform::default(),
                 InheritedVisibility::default(),
@@ -54,6 +51,7 @@ fn on_add_card(
                     message_writer.write(SpawnCard {
                         entity: child,
                         card,
+                        transform: Transform::from_xyz(0., 0., 0.),
                     });
                 }
             }

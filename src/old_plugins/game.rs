@@ -1,4 +1,4 @@
-use crate::plugins::load::LoadCompleteMessage;
+use crate::old_plugins::load::LoadCompleteMessage;
 use bevy::camera::ScalingMode::FixedVertical;
 use bevy::prelude::*;
 
