@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use bevy::{
     asset::Handle,
     ecs::{
@@ -6,12 +8,12 @@ use bevy::{
         observer::On,
         query::With,
         resource::Resource,
-        system::{Commands, Res, Single},
+        system::{Commands, Query, Res, Single},
     },
     image::Image,
     picking::{
         Pickable,
-        events::{Enter, Out, Pointer},
+        events::{Click, Enter, Out, Pointer},
     },
     sprite::Sprite,
     transform::components::Transform,
@@ -22,12 +24,15 @@ use rand::seq::SliceRandom;
 
 use crate::{
     events::Spawn,
-    gameplay::card::{Card, CardColor, CardSymbol},
+    gameplay::{
+        card::{Card, CardColor, CardSpawnData, CardSymbol},
+        hand::Hand,
+    },
 };
 
-#[derive(Component, Default)]
+#[derive(Component)]
 pub struct Deck {
-    pub cards: Vec<Card>,
+    pub cards: VecDeque<Card>,
 }
 
 #[derive(Resource, AssetCollection)]
@@ -38,8 +43,9 @@ pub struct DeckAssets {
 
 impl Deck {
     pub fn on_spawn(_: On<Spawn<Deck>>, mut commands: Commands, assets: Res<DeckAssets>) {
-        let mut deck = Deck::default();
-        deck.generate_deck();
+        let deck = Deck {
+            cards: Self::generate_deck(),
+        };
 
         commands
             .spawn(deck)
@@ -50,10 +56,11 @@ impl Deck {
             })
             .insert(Pickable::default())
             .observe(Self::on_hover_enter)
-            .observe(Self::on_hover_out);
+            .observe(Self::on_hover_out)
+            .observe(Self::on_click);
     }
 
-    fn generate_deck(&mut self) {
+    fn generate_deck() -> VecDeque<Card> {
         let mut cards = Vec::new();
 
         for color in 0..4 {
@@ -83,7 +90,7 @@ impl Deck {
         let mut rng = rand::rng();
         cards.shuffle(&mut rng);
 
-        self.cards = cards
+        VecDeque::from(cards)
     }
 
     fn on_hover_enter(
@@ -104,5 +111,29 @@ impl Deck {
         commands
             .entity(*window)
             .insert(CursorIcon::from(SystemCursorIcon::Default));
+    }
+
+    fn on_click(
+        _: On<Pointer<Click>>,
+        mut commands: Commands,
+        mut deck: Single<&mut Deck>,
+        mut hand_query: Query<Entity, With<Hand>>,
+    ) {
+        let Some(hand_entity) = hand_query.iter_mut().next() else {
+            return;
+        };
+
+        let Some(card) = deck.cards.pop_back() else {
+            return;
+        };
+
+        commands.trigger(
+            Spawn::<Card, CardSpawnData>::default()
+                .with_data(CardSpawnData {
+                    color: card.color,
+                    symbol: card.symbol,
+                })
+                .with_parent(hand_entity),
+        );
     }
 }

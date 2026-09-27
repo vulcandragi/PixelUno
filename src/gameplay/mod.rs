@@ -1,5 +1,6 @@
 pub mod card;
 pub mod deck;
+pub mod hand;
 
 use bevy::{
     app::Plugin,
@@ -15,7 +16,11 @@ use bevy_asset_loader::loading_state::{
 
 use crate::{
     events::Spawn,
-    gameplay::deck::{Deck, DeckAssets},
+    gameplay::{
+        card::{Card, CardAssets},
+        deck::{Deck, DeckAssets},
+        hand::Hand,
+    },
     states::AppState,
 };
 
@@ -24,11 +29,15 @@ pub struct GameplayPlugin;
 impl Plugin for GameplayPlugin {
     fn build(&self, app: &mut bevy::app::App) {
         app.configure_loading_state(
-            LoadingStateConfig::new(AppState::Loading).load_collection::<DeckAssets>(),
+            LoadingStateConfig::new(AppState::Loading)
+                .load_collection::<DeckAssets>()
+                .load_collection::<CardAssets>(),
         )
         .insert_resource(ClearColor(Color::Srgba(Srgba::hex("9c6024").unwrap())))
         .add_systems(OnEnter(AppState::Gameplay), setup)
-        .add_observer(Deck::on_spawn);
+        .add_observer(Deck::on_spawn)
+        .add_observer(Hand::on_spawn)
+        .add_observer(Card::on_spawn);
     }
 }
 
@@ -44,4 +53,5 @@ fn setup(mut commands: Commands) {
         }),
     ));
     commands.trigger(Spawn::<Deck>::default());
+    commands.trigger(Spawn::<Hand>::default());
 }
