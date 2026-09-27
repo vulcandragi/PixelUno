@@ -14,6 +14,7 @@ use bevy_asset_loader::loading_state::{
 };
 
 use crate::{
+    events::Spawn,
     gameplay::deck::{Deck, DeckAssets},
     states::AppState,
 };
@@ -42,5 +43,5 @@ fn setup(mut commands: Commands) {
             ..OrthographicProjection::default_2d()
         }),
     ));
-    commands.spawn(Deck::default());
+    commands.trigger(Spawn::<Deck>::default());
 }

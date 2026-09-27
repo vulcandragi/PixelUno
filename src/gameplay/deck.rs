@@ -3,11 +3,10 @@ use bevy::{
     ecs::{
         component::Component,
         entity::Entity,
-        lifecycle::Add,
         observer::On,
         query::With,
         resource::Resource,
-        system::{Commands, Query, Res, Single},
+        system::{Commands, Res, Single},
     },
     image::Image,
     picking::{
@@ -21,7 +20,10 @@ use bevy::{
 use bevy_asset_loader::asset_collection::AssetCollection;
 use rand::seq::SliceRandom;
 
-use crate::gameplay::card::{Card, CardColor, CardSymbol};
+use crate::{
+    events::Spawn,
+    gameplay::card::{Card, CardColor, CardSymbol},
+};
 
 #[derive(Component, Default)]
 pub struct Deck {
@@ -35,19 +37,12 @@ pub struct DeckAssets {
 }
 
 impl Deck {
-    pub fn on_spawn(
-        event: On<Add, Deck>,
-        mut commands: Commands,
-        mut query: Query<&mut Deck>,
-        assets: Res<DeckAssets>,
-    ) {
-        let Ok(mut deck) = query.get_mut(event.entity) else {
-            return;
-        };
+    pub fn on_spawn(_: On<Spawn<Deck>>, mut commands: Commands, assets: Res<DeckAssets>) {
+        let mut deck = Deck::default();
+        deck.generate_deck();
 
         commands
-            .get_entity(event.entity)
-            .expect("Falha ao obter deck entity")
+            .spawn(deck)
             .insert(Transform::from_xyz(500.0, 0.0, 0.0))
             .insert(Sprite {
                 image: assets.image.clone(),
@@ -56,8 +51,6 @@ impl Deck {
             .insert(Pickable::default())
             .observe(Self::on_hover_enter)
             .observe(Self::on_hover_out);
-
-        deck.generate_deck();
     }
 
     fn generate_deck(&mut self) {

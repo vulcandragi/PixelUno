@@ -1,10 +1,15 @@
 use bevy::{
-    DefaultPlugins, app::{App, PluginGroup}, image::ImagePlugin, state::app::AppExtStates, window::{Window, WindowPlugin},
+    DefaultPlugins,
+    app::{App, PluginGroup},
+    image::ImagePlugin,
+    state::app::AppExtStates,
+    window::{Window, WindowPlugin},
 };
 use bevy_asset_loader::loading_state::{LoadingState, LoadingStateAppExt};
 
 use crate::{gameplay::GameplayPlugin, states::AppState};
 
+mod events;
 mod gameplay;
 mod states;
 
