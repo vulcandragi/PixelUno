@@ -7,10 +7,11 @@ use bevy::{
 };
 use bevy_asset_loader::loading_state::{LoadingState, LoadingStateAppExt};
 
-use crate::{gameplay::GameplayPlugin, states::AppState};
+use crate::{gameplay::GameplayPlugin, plugins::debug::DebugPlugin, states::AppState};
 
 mod events;
 mod gameplay;
+mod plugins;
 mod states;
 
 fn main() {
@@ -30,6 +31,7 @@ fn main() {
         .add_loading_state(
             LoadingState::new(AppState::Loading).continue_to_state(AppState::Gameplay),
         )
+        .add_plugins(DebugPlugin)
         .add_plugins(GameplayPlugin)
         .run();
 }

@@ -5,6 +5,7 @@ use bevy::{
     ecs::{
         component::Component,
         entity::Entity,
+        name::Name,
         observer::On,
         query::With,
         resource::Resource,
@@ -49,6 +50,7 @@ impl Deck {
 
         commands
             .spawn(deck)
+            .insert(Name("Deck".into()))
             .insert(Transform::from_xyz(500.0, 0.0, 0.0))
             .insert(Sprite {
                 image: assets.image.clone(),
@@ -93,6 +95,10 @@ impl Deck {
         VecDeque::from(cards)
     }
 
+    pub fn get_next_card(&mut self) -> Option<Card> {
+        self.cards.pop_back()
+    }
+
     fn on_hover_enter(
         _: On<Pointer<Enter>>,
         mut commands: Commands,
@@ -123,7 +129,7 @@ impl Deck {
             return;
         };
 
-        let Some(card) = deck.cards.pop_back() else {
+        let Some(card) = deck.get_next_card() else {
             return;
         };
 

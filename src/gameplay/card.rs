@@ -4,11 +4,16 @@ use bevy::{
         component::Component,
         entity::Entity,
         event::EntityEvent,
+        name::Name,
         observer::On,
         resource::Resource,
         system::{Commands, Res},
     },
     image::{Image, TextureAtlas, TextureAtlasLayout},
+    picking::{
+        Pickable,
+        events::{Click, Pointer},
+    },
     reflect::Reflect,
     sprite::Sprite,
     transform::components::Transform,
@@ -74,7 +79,10 @@ pub enum CardSymbol {
 
 #[derive(EntityEvent)]
 #[entity_event(propagate)]
-pub struct AddCard(Entity);
+pub struct AddCard {
+    pub entity: Entity,
+    pub card: Entity,
+}
 
 impl Card {
     pub fn on_spawn(
@@ -86,10 +94,11 @@ impl Card {
             color: event.data.color,
             symbol: event.data.symbol,
         };
-        let atlas_index = card.atlas_index();
+        let atlas_index = card.get_order();
 
         let entity = commands
             .spawn(card)
+            .insert(Name("Card".into()))
             .insert(Sprite {
                 image: assests.image.clone(),
                 texture_atlas: Some(TextureAtlas {
@@ -99,15 +108,20 @@ impl Card {
                 ..Default::default()
             })
             .insert(Transform::from_xyz(0., 0., 0.))
+            .insert(Pickable::default())
             .id();
 
         if let Some(parent) = event.parent {
+            commands.entity(entity).observe(Self::on_click);
             commands.entity(parent).add_child(entity);
-            commands.trigger(AddCard(parent));
+            commands.trigger(AddCard {
+                entity: parent,
+                card: entity,
+            });
         }
     }
 
-    pub fn atlas_index(&self) -> usize {
+    pub fn get_order(&self) -> usize {
         if self.color == CardColor::Black {
             return match self.symbol {
                 CardSymbol::Color => 60usize,
@@ -121,5 +135,29 @@ impl Card {
         } else {
             ((u8::from(self.color)) * 15 + u8::from(self.symbol)) as usize
         }
+    }
+
+    pub fn check_card(&self, next_card: &Card) -> bool {
+        if next_card.color == CardColor::None || next_card.symbol == CardSymbol::None {
+            return false;
+        }
+
+        if self.color == next_card.color {
+            return true;
+        }
+
+        if self.symbol == next_card.symbol {
+            return true;
+        }
+
+        if next_card.color == CardColor::Black {
+            return true;
+        }
+
+        false
+    }
+
+    pub fn on_click(mut event: On<Pointer<Click>>) {
+        event.propagate(true);
     }
 }

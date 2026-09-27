@@ -1,6 +1,7 @@
 pub mod card;
 pub mod deck;
 pub mod hand;
+pub mod stack;
 
 use bevy::{
     app::Plugin,
@@ -20,6 +21,7 @@ use crate::{
         card::{Card, CardAssets},
         deck::{Deck, DeckAssets},
         hand::Hand,
+        stack::Stack,
     },
     states::AppState,
 };
@@ -37,7 +39,8 @@ impl Plugin for GameplayPlugin {
         .add_systems(OnEnter(AppState::Gameplay), setup)
         .add_observer(Deck::on_spawn)
         .add_observer(Hand::on_spawn)
-        .add_observer(Card::on_spawn);
+        .add_observer(Card::on_spawn)
+        .add_observer(Stack::on_spawn);
     }
 }
 
@@ -54,4 +57,5 @@ fn setup(mut commands: Commands) {
     ));
     commands.trigger(Spawn::<Deck>::default());
     commands.trigger(Spawn::<Hand>::default());
+    commands.trigger(Spawn::<Stack>::default());
 }

@@ -2,9 +2,9 @@
 
 ## Etapa 1
 - [x] Gerar Deck
-- [ ] Cartas da Mão
-- [ ] Pilha do jogo
-- [ ] Jogar Cartas
+- [x] Cartas da Mão
+- [x] Pilha do jogo
+- [x] Jogar Cartas
 
 ## Etapa 2
 - [ ] Base da UI
