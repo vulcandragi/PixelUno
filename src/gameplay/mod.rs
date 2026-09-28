@@ -2,6 +2,7 @@ pub mod card;
 pub mod deck;
 pub mod hand;
 pub mod stack;
+pub mod table;
 
 use bevy::{
     app::Plugin,
@@ -22,6 +23,7 @@ use crate::{
         deck::{Deck, DeckAssets},
         hand::Hand,
         stack::Stack,
+        table::{Table, TableAssets},
     },
     states::AppState,
 };
@@ -33,14 +35,16 @@ impl Plugin for GameplayPlugin {
         app.configure_loading_state(
             LoadingStateConfig::new(AppState::Loading)
                 .load_collection::<DeckAssets>()
-                .load_collection::<CardAssets>(),
+                .load_collection::<CardAssets>()
+                .load_collection::<TableAssets>(),
         )
-        .insert_resource(ClearColor(Color::Srgba(Srgba::hex("9c6024").unwrap())))
+        .insert_resource(ClearColor(Color::Srgba(Srgba::hex("000000").unwrap())))
         .add_systems(OnEnter(AppState::Gameplay), setup)
         .add_observer(Deck::on_spawn)
         .add_observer(Hand::on_spawn)
         .add_observer(Card::on_spawn)
-        .add_observer(Stack::on_spawn);
+        .add_observer(Stack::on_spawn)
+        .add_observer(Table::on_spawn);
     }
 }
 
@@ -55,6 +59,7 @@ fn setup(mut commands: Commands) {
             ..OrthographicProjection::default_2d()
         }),
     ));
+    commands.trigger(Spawn::<Table>::default());
     commands.trigger(Spawn::<Deck>::default());
     commands.trigger(Spawn::<Hand>::default());
     commands.trigger(Spawn::<Stack>::default());

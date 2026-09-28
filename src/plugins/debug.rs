@@ -11,5 +11,5 @@ impl Plugin for DebugPlugin {
     }
 
     #[cfg(not(feature = "debug"))]
-    fn build(&self, app: &mut bevy::app::App) {}
+    fn build(&self, _app: &mut bevy::app::App) {}
 }

@@ -25,3 +25,7 @@
 - [ ] Eventos de Jogada
 - [ ] Fim de Jogo
 - [ ] Resetar Jogo
+
+## Extra
+- [ ] Shader da Mesa
+- [ ] Animações das Cartas
