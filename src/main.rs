@@ -3,7 +3,7 @@ use bevy::{
     app::{App, PluginGroup},
     image::ImagePlugin,
     state::app::AppExtStates,
-    window::{Window, WindowPlugin},
+    window::{Window, WindowPlugin, WindowResolution},
 };
 use bevy_asset_loader::loading_state::{LoadingState, LoadingStateAppExt};
 
@@ -22,6 +22,8 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "Pixel Uno".into(),
+                        resolution: WindowResolution::new(1280, 720),
+                        resizable: false,
                         ..Default::default()
                     }),
                     ..Default::default()

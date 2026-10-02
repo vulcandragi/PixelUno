@@ -1,6 +1,7 @@
 pub mod card;
 pub mod deck;
 pub mod hand;
+pub mod player;
 pub mod stack;
 pub mod table;
 
@@ -9,6 +10,7 @@ use bevy::{
     camera::{Camera2d, ClearColor, OrthographicProjection, Projection, ScalingMode},
     color::{Color, Srgba},
     ecs::system::Commands,
+    sprite_render::Material2dPlugin,
     state::state::OnEnter,
 };
 use bevy_asset_loader::loading_state::{
@@ -23,7 +25,7 @@ use crate::{
         deck::{Deck, DeckAssets},
         hand::Hand,
         stack::Stack,
-        table::{Table, TableAssets},
+        table::{Table, TableMaterial},
     },
     states::AppState,
 };
@@ -35,10 +37,10 @@ impl Plugin for GameplayPlugin {
         app.configure_loading_state(
             LoadingStateConfig::new(AppState::Loading)
                 .load_collection::<DeckAssets>()
-                .load_collection::<CardAssets>()
-                .load_collection::<TableAssets>(),
+                .load_collection::<CardAssets>(),
         )
         .insert_resource(ClearColor(Color::Srgba(Srgba::hex("000000").unwrap())))
+        .add_plugins(Material2dPlugin::<TableMaterial>::default())
         .add_systems(OnEnter(AppState::Gameplay), setup)
         .add_observer(Deck::on_spawn)
         .add_observer(Hand::on_spawn)
