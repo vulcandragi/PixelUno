@@ -23,7 +23,6 @@ fn main() {
                     primary_window: Some(Window {
                         title: "Pixel Uno".into(),
                         resolution: WindowResolution::new(1280, 720),
-                        resizable: false,
                         ..Default::default()
                     }),
                     ..Default::default()
