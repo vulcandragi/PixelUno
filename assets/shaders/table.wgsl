@@ -26,13 +26,8 @@ fn border_radius(current_pixel: vec2f, range: vec2f, curve: i32) -> bool {
 
 @fragment
 fn fragment(mesh: VertexOutput) -> @location(0) vec4f {
-    let current_pixel = size * mesh.uv;
+    // let current_pixel = size * mesh.uv;
 
-    if (border_range(current_pixel, vec2f(90, 85))) {
-        // #3d0a12
-        let stroke_color = srgb_to_linear(vec3f(0.24, 0.04, 0.07));
-        return stroke_color;
-    } else {
         // #7d1523
         let center_color = srgb_to_linear(vec3f(0.490, 0.082, 0.137));
         // #5c101c
@@ -41,10 +36,15 @@ fn fragment(mesh: VertexOutput) -> @location(0) vec4f {
         let center = vec2f(0.5, 0.5);
         let distance = length((mesh.uv - center) * vec2f(size.x / size.y, 1.0));
     
-        let mixin = clamp(distance * 2, 0, 1);
+        let mixin = clamp(distance * 1.5, 0, 1);
     
         return mix(center_color, border_color, mixin);
-    }
+    // if (border_range(current_pixel, vec2f(90, 85))) {
+    //     // #3d0a12
+    //     let stroke_color = srgb_to_linear(vec3f(0.24, 0.04, 0.07));
+    //     return stroke_color;
+    // } else {
+    // }
 
-    return vec4f(0, 0, 0, 0);
+    // return vec4f(0, 0, 0, 0);
 }

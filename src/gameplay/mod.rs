@@ -4,6 +4,7 @@ pub mod hand;
 pub mod player;
 pub mod stack;
 pub mod table;
+pub mod turn;
 
 use bevy::{
     app::Plugin,
@@ -11,7 +12,7 @@ use bevy::{
     color::{Color, Srgba},
     ecs::system::Commands,
     sprite_render::Material2dPlugin,
-    state::state::OnEnter,
+    state::{app::AppExtStates, state::OnEnter},
 };
 use bevy_asset_loader::loading_state::{
     LoadingStateAppExt,
@@ -24,8 +25,10 @@ use crate::{
         card::{Card, CardAssets},
         deck::{Deck, DeckAssets},
         hand::Hand,
+        player::Player,
         stack::Stack,
         table::{Table, TableMaterial},
+        turn::{TurnManager, TurnPhase},
     },
     states::AppState,
 };
@@ -40,13 +43,16 @@ impl Plugin for GameplayPlugin {
                 .load_collection::<CardAssets>(),
         )
         .insert_resource(ClearColor(Color::Srgba(Srgba::hex("000000").unwrap())))
+        .insert_resource(TurnManager::default())
+        .init_state::<TurnPhase>()
         .add_plugins(Material2dPlugin::<TableMaterial>::default())
         .add_systems(OnEnter(AppState::Gameplay), setup)
         .add_observer(Deck::on_spawn)
         .add_observer(Hand::on_spawn)
         .add_observer(Card::on_spawn)
         .add_observer(Stack::on_spawn)
-        .add_observer(Table::on_spawn);
+        .add_observer(Table::on_spawn)
+        .add_observer(Player::on_spawn);
     }
 }
 
@@ -65,4 +71,5 @@ fn setup(mut commands: Commands) {
     commands.trigger(Spawn::<Deck>::default());
     commands.trigger(Spawn::<Hand>::default());
     commands.trigger(Spawn::<Stack>::default());
+    commands.trigger(Spawn::<Player>::default());
 }

@@ -10,10 +10,7 @@ use bevy::{
         system::{Commands, Res},
     },
     image::{Image, TextureAtlas, TextureAtlasLayout},
-    picking::{
-        Pickable,
-        events::{Click, Pointer},
-    },
+    picking::{Pickable, events::PointerClick},
     reflect::Reflect,
     sprite::Sprite,
     transform::components::Transform,
@@ -157,7 +154,7 @@ impl Card {
         false
     }
 
-    pub fn on_click(mut event: On<Pointer<Click>>) {
+    pub fn on_click(mut event: On<PointerClick>) {
         event.propagate(true);
     }
 }

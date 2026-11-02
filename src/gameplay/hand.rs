@@ -10,7 +10,7 @@ use bevy::{
         system::{Commands, Query, Single},
     },
     math::Vec3,
-    picking::events::{Click, Pointer},
+    picking::events::PointerClick,
     transform::components::Transform,
 };
 
@@ -68,7 +68,7 @@ impl Hand {
     }
 
     fn on_card_click(
-        event: On<Pointer<Click>>,
+        event: On<PointerClick>,
         mut commands: Commands,
         query: Query<(Entity, &Card)>,
         stack: Single<(Entity, &Stack)>,

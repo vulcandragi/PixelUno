@@ -14,7 +14,7 @@ use bevy::{
     image::Image,
     picking::{
         Pickable,
-        events::{Click, Enter, Out, Pointer},
+        events::{PointerClick, PointerEnter, PointerOut},
     },
     sprite::Sprite,
     transform::components::Transform,
@@ -100,7 +100,7 @@ impl Deck {
     }
 
     fn on_hover_enter(
-        _: On<Pointer<Enter>>,
+        _: On<PointerEnter>,
         mut commands: Commands,
         window: Single<Entity, With<Window>>,
     ) {
@@ -110,7 +110,7 @@ impl Deck {
     }
 
     fn on_hover_out(
-        _: On<Pointer<Out>>,
+        _: On<PointerOut>,
         mut commands: Commands,
         window: Single<Entity, With<Window>>,
     ) {
@@ -120,7 +120,7 @@ impl Deck {
     }
 
     fn on_click(
-        _: On<Pointer<Click>>,
+        _: On<PointerClick>,
         mut commands: Commands,
         mut deck: Single<&mut Deck>,
         mut hand_query: Query<Entity, With<Hand>>,

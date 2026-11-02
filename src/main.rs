@@ -22,7 +22,6 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "Pixel Uno".into(),
-                        resolution: WindowResolution::new(1280, 720),
                         ..Default::default()
                     }),
                     ..Default::default()
