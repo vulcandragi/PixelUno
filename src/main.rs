@@ -1,16 +1,18 @@
 use bevy::{
     DefaultPlugins,
-    app::{App, PluginGroup},
+    app::{App, PluginGroup, Startup},
+    camera::{Camera2d, OrthographicProjection, Projection, ScalingMode},
+    ecs::system::Commands,
     image::ImagePlugin,
     state::app::AppExtStates,
-    window::{Window, WindowPlugin, WindowResolution},
+    window::{Window, WindowPlugin},
 };
 use bevy_asset_loader::loading_state::{LoadingState, LoadingStateAppExt};
 
-use crate::{gameplay::GameplayPlugin, plugins::debug::DebugPlugin, states::AppState};
+use crate::{game::GamePlugin, menu::MenuPlugin, plugins::debug::DebugPlugin, states::AppState};
 
-mod events;
-mod gameplay;
+mod game;
+mod menu;
 mod plugins;
 mod states;
 
@@ -29,9 +31,23 @@ fn main() {
         )
         .init_state::<AppState>()
         .add_loading_state(
-            LoadingState::new(AppState::Loading).continue_to_state(AppState::Gameplay),
+            LoadingState::new(AppState::Loading).continue_to_state(AppState::MainMenu),
         )
         .add_plugins(DebugPlugin)
-        .add_plugins(GameplayPlugin)
+        .add_plugins((GamePlugin, MenuPlugin))
+        .add_systems(Startup, setup)
         .run();
+}
+
+fn setup(mut commands: Commands) {
+    commands.spawn((
+        Camera2d,
+        Projection::from(OrthographicProjection {
+            scaling_mode: ScalingMode::AutoMax {
+                max_width: 1280.,
+                max_height: 720.,
+            },
+            ..OrthographicProjection::default_2d()
+        }),
+    ));
 }

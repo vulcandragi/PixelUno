@@ -4796,6 +4796,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_asset_loader",
  "bytes",
+ "log",
  "num_enum",
  "rand",
 ]

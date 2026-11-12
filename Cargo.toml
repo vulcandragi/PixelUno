@@ -9,16 +9,26 @@ opt-level = 1
 [profile.dev.package."*"]
 opt-level = 3
 
+[profile.release]
+codegen-units = 1
+lto = "thin"
+
 [dependencies]
-bevy = { version = "0.20.1", features = [ "wayland", "webp", "sprite_picking" ] }
-bevy_asset_loader = { version = "0.28.1", features = [ "2d" ] }
-bevy-inspector-egui = { version = "0.38.0", optional = true }
+bevy = { version = "0.20.1", features = ["wayland", "webp", "sprite_picking"] }
+bevy_asset_loader = { version = "0.28.1", features = ["2d"] }
 num_enum = { version = "0.7.6" }
+bevy-inspector-egui = { version = "0.38.0", optional = true }
 rand = { version = "0.10.3" }
 anyhow = { version = "1.0.104" }
+log = { version = "*", features = [
+    "max_level_debug",
+    "release_max_level_warn",
+] }
 
 # Fix Lock Versions
 bytes = "1.12.1"
+
+[dev-dependencies]
 
 [features]
 debug = ["dep:bevy-inspector-egui"]
