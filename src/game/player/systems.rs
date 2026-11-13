@@ -7,7 +7,6 @@ use bevy::{
         relationship::RelationshipSourceCollection,
         system::{Commands, Query, ResMut},
     },
-    log::info,
     math::Vec3,
     scene::CommandsSceneExt,
     state::commands::CommandsStatesExt,

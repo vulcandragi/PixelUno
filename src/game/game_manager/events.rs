@@ -4,7 +4,7 @@ use bevy::{
         event::Event,
         observer::On,
         query::With,
-        system::{Commands, Query, Res, ResMut, Single},
+        system::{Commands, Query, Res, ResMut, Single, SystemParam},
     },
     log::{info, warn},
     scene::CommandsSceneExt,
@@ -28,19 +28,24 @@ pub enum ActionIntent {
     Buy,
 }
 
+#[derive(SystemParam)]
+pub struct OnActionIntentParam<'w, 's> {
+    pub game_manager: ResMut<'w, GameManager>,
+    pub game_phase: Res<'w, State<GamePhase>>,
+    pub discard_pile: Single<'w, 's, (Entity, &'static mut DiscardPile)>,
+    pub deck: Single<'w, 's, &'static mut Deck>,
+    pub cards: Query<'w, 's, &'static Card>,
+    pub players: Query<'w, 's, &'static PlayerType, With<Player>>,
+}
+
 pub fn on_action_intent(
     on: On<ActionIntent>,
     mut commands: Commands,
-    mut game_manager: ResMut<GameManager>,
-    game_phase: Res<State<GamePhase>>,
-    mut discard_pile: Single<(Entity, &mut DiscardPile)>,
-    mut deck: Single<&mut Deck>,
-    cards: Query<&Card>,
-    players: Query<&PlayerType, With<Player>>,
+    mut param: OnActionIntentParam,
 ) {
     info!("{:?}", on);
 
-    if *game_phase != GamePhase::WaitingForInput {
+    if *param.game_phase != GamePhase::WaitingForInput {
         return;
     }
 
@@ -48,18 +53,18 @@ pub fn on_action_intent(
         ActionIntent::Card {
             next_card: next_card_entity,
         } => {
-            let (discard_pile_entity, mut discard_pile) = discard_pile.into_inner();
+            let (discard_pile_entity, mut discard_pile) = param.discard_pile.into_inner();
             let Some(card_entity) = discard_pile.last_card else {
                 warn!("Last card not found");
                 return;
             };
 
-            let Ok(card) = cards.get(card_entity) else {
+            let Ok(card) = param.cards.get(card_entity) else {
                 warn!("Card not found");
                 return;
             };
 
-            let Ok(next_card) = cards.get(next_card_entity) else {
+            let Ok(next_card) = param.cards.get(next_card_entity) else {
                 warn!("Card not found");
                 return;
             };
@@ -75,17 +80,17 @@ pub fn on_action_intent(
             discard_pile.last_card = Some(next_card_entity);
         }
         ActionIntent::Buy => {
-            let Some(player_entity) = game_manager.current_player else {
+            let Some(player_entity) = param.game_manager.current_player else {
                 warn!("Current player not set");
                 return;
             };
 
-            let Ok(player_type) = players.get(player_entity) else {
+            let Ok(player_type) = param.players.get(player_entity) else {
                 warn!("Player not found");
                 return;
             };
 
-            let Some(card) = deck.get_card() else {
+            let Some(card) = param.deck.get_card() else {
                 warn!("Deck is empty");
                 return;
             };
