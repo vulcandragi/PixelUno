@@ -22,7 +22,19 @@ pub struct DeckAssets {
     pub image: Handle<Image>,
 }
 
-pub fn generate_deck() -> VecDeque<Card> {
+impl Deck {
+    pub fn new() -> Self {
+        Self {
+            cards: generate_deck(),
+        }
+    }
+
+    pub fn get_card(&mut self) -> Option<Card> {
+        self.cards.pop_back()
+    }
+}
+
+fn generate_deck() -> VecDeque<Card> {
     let mut cards = Vec::new();
 
     for color in 0..4 {

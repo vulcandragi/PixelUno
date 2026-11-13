@@ -78,4 +78,24 @@ impl Card {
             ((u8::from(self.color)) * 15 + u8::from(self.symbol)) as usize
         }
     }
+
+    pub fn check_card(&self, next_card: &Card) -> bool {
+        if next_card.color == CardColor::None || next_card.symbol == CardSymbol::None {
+            return false;
+        }
+
+        if self.color == next_card.color {
+            return true;
+        }
+
+        if self.symbol == next_card.symbol {
+            return true;
+        }
+
+        if next_card.color == CardColor::Black {
+            return true;
+        }
+
+        false
+    }
 }

@@ -9,9 +9,9 @@ use bevy::{
 
 use crate::game::{
     card::{components::CardVisibility, spawn_card},
-    components::GamePhase,
     deck::components::Deck,
     discard_pile::components::DiscardPile,
+    game_manager::components::GamePhase,
     player::components::{Player, PlayerType},
 };
 

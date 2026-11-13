@@ -1,4 +1,7 @@
-use bevy::scene::{Scene, bsn};
+use bevy::{
+    scene::{Scene, bsn},
+    transform::components::Transform,
+};
 
 use crate::game::discard_pile::components::DiscardPile;
 
@@ -9,5 +12,6 @@ pub fn spawn_discard_pile() -> impl Scene {
     bsn! {
         #DiscardPile
         DiscardPile
+        Transform
     }
 }

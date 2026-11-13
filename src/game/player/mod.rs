@@ -1,14 +1,18 @@
 use bevy::{
     ecs::name::Name,
-    scene::{Scene, bsn},
+    scene::{Scene, bsn, on},
     time::{Timer, TimerMode},
     transform::components::Transform,
 };
 use rand::random_range;
 
-use crate::game::player::components::{Player, PlayerType};
+use crate::game::player::{
+    components::{Player, PlayerType},
+    events::on_player_click_card,
+};
 
 pub mod components;
+pub mod events;
 pub mod systems;
 
 pub fn spawn_local_player(name: String) -> impl Scene {
@@ -17,6 +21,7 @@ pub fn spawn_local_player(name: String) -> impl Scene {
         PlayerType::Local
         Name(name)
         Transform::from_xyz(0., -200., 0.)
+        on(on_player_click_card)
     }
 }
 

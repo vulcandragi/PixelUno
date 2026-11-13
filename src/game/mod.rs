@@ -1,7 +1,7 @@
 pub mod card;
-pub mod components;
 pub mod deck;
 pub mod discard_pile;
+pub mod game_manager;
 pub mod player;
 pub mod table;
 
@@ -19,9 +19,13 @@ use bevy_asset_loader::loading_state::{
 use crate::{
     game::{
         card::{components::CardAssets, systems::change_card_visibility},
-        components::{GameManager, GamePhase},
         deck::{components::DeckAssets, spawn_deck, systems::distribute_cards},
         discard_pile::{spawn_discard_pile, systems::random_direction},
+        game_manager::{
+            components::{GameManager, GamePhase},
+            events::on_action_intent,
+            system::passing_turn,
+        },
         player::systems::{orgazine_player_hand, register_players},
         table::{components::TableAssets, spawn_table},
     },
@@ -43,6 +47,7 @@ impl Plugin for GamePlugin {
         .add_systems(OnEnter(AppState::Game), setup)
         .add_systems(OnEnter(GamePhase::RegisterPlayers), register_players)
         .add_systems(OnEnter(GamePhase::DistributeCards), distribute_cards)
+        .add_systems(OnEnter(GamePhase::PassingTurn), passing_turn)
         .add_systems(
             Update,
             (
@@ -51,7 +56,8 @@ impl Plugin for GamePlugin {
                 random_direction,
             )
                 .run_if(in_state(AppState::Game)),
-        );
+        )
+        .add_observer(on_action_intent);
     }
 }
 
