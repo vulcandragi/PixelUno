@@ -6,7 +6,7 @@ pub mod player;
 pub mod table;
 
 use bevy::{
-    app::{Plugin, Update},
+    app::{FixedUpdate, Plugin, Update},
     ecs::{schedule::IntoScheduleConfigs, system::Commands},
     scene::CommandsSceneExt,
     state::{app::AppExtStates, commands::CommandsStatesExt, condition::in_state, state::OnEnter},
@@ -26,7 +26,7 @@ use crate::{
             events::on_action_intent,
             system::passing_turn,
         },
-        player::systems::{orgazine_player_hand, register_players},
+        player::systems::{orgazine_player_hand, pc_player_play, register_players},
         table::{components::TableAssets, spawn_table},
     },
     states::AppState,
@@ -56,6 +56,10 @@ impl Plugin for GamePlugin {
                 random_direction,
             )
                 .run_if(in_state(AppState::Game)),
+        )
+        .add_systems(
+            FixedUpdate,
+            (pc_player_play).run_if(in_state(AppState::Game)),
         )
         .add_observer(on_action_intent);
     }

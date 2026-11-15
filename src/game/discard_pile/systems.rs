@@ -8,12 +8,19 @@ use bevy::{
     math::{Quat, Vec3},
     transform::components::Transform,
 };
-use rand::RngExt;
+use rand::random_range;
 
-use crate::game::{card::components::Card, discard_pile::components::DiscardPile};
+use crate::game::{
+    card::components::{Card, CardVisibility},
+    discard_pile::components::DiscardPile,
+};
 
-type RandomDirectionCardQuery<'w, 's> =
-    Query<'w, 's, (Entity, &'static mut Transform), (With<Card>, Changed<ChildOf>)>;
+type RandomDirectionCardQuery<'w, 's> = Query<
+    'w,
+    's,
+    (Entity, &'static mut Transform, &'static mut CardVisibility),
+    (With<Card>, Changed<ChildOf>),
+>;
 
 pub fn random_direction(
     discard_pile: Single<(&DiscardPile, &Children)>,
@@ -25,7 +32,7 @@ pub fn random_direction(
         return;
     };
 
-    let Ok((card_entity, mut transform)) = card.get_mut(entity) else {
+    let Ok((card_entity, mut transform, mut card_visibility)) = card.get_mut(entity) else {
         return;
     };
 
@@ -33,12 +40,11 @@ pub fn random_direction(
         return;
     }
 
-    let mut rng = rand::rng();
-
     transform.translation = Vec3 {
-        x: rng.random_range(-10..10) as f32,
-        y: rng.random_range(-10..10) as f32,
+        x: random_range(-10..10) as f32,
+        y: random_range(-10..10) as f32,
         z: children.iter().count() as f32 + 1.,
     };
-    transform.rotation = Quat::from_rotation_z(rng.random_range(-1.0..1.0));
+    transform.rotation = Quat::from_rotation_z(random_range(-1.0..1.0));
+    *card_visibility = CardVisibility::FaceUp;
 }

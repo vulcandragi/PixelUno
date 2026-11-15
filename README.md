@@ -1,25 +1,29 @@
 # Reformulação
 
 ## Etapa 1
+
 - [x] Gerar Deck
 - [x] Cartas da Mão
 - [x] Pilha do jogo
 - [x] Jogar Cartas
 
 ## Etapa 2
+
 - [ ] Base da UI
 - [ ] Player Name
-- [ ] Fake Player
-- [ ] Turno
+- [x] Fake Player
+- [x] Turno
 - [ ] Cartas de Ação
 - [ ] Gerar Novo Deck
 
 ## Etapa 3
-- [ ] Fake Player Joga
+
+- [x] Fake Player Joga
 - [ ] Fim do Jogo
 - [ ] Resetar Jogo
 
 ## Etapa 4
+
 - [ ] Web Suport
 - [ ] Online Player
 - [ ] Eventos de Jogada
@@ -27,5 +31,6 @@
 - [ ] Resetar Jogo
 
 ## Extra
+
 - [ ] Shader da Mesa
 - [ ] Animações das Cartas
