@@ -69,6 +69,8 @@ pub fn on_action_intent(
                 return;
             };
 
+            info!("{next_card:?}");
+
             if !card.check_card(next_card) {
                 commands.set_state(GamePhase::WaitingForInput);
                 return;
