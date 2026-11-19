@@ -10,7 +10,7 @@
 ## Etapa 2
 
 - [ ] Base da UI
-- [ ] Player Name
+- [x] Player Name
 - [x] Fake Player
 - [x] Turno
 - [ ] Cartas de Ação

@@ -27,7 +27,10 @@ use crate::{
             events::on_action_intent,
             system::passing_turn,
         },
-        player::systems::{orgazine_player_hand, pc_player_play, register_players},
+        player::{
+            components::PlayerAssets,
+            systems::{orgazine_player_hand, pc_player_play, register_players},
+        },
         table::{components::TableAssets, spawn_table},
     },
     states::AppState,
@@ -41,7 +44,8 @@ impl Plugin for GamePlugin {
             LoadingStateConfig::new(AppState::Loading)
                 .load_collection::<DeckAssets>()
                 .load_collection::<CardAssets>()
-                .load_collection::<TableAssets>(),
+                .load_collection::<TableAssets>()
+                .load_collection::<PlayerAssets>(),
         )
         .init_state::<GamePhase>()
         .init_resource::<GameManager>()
