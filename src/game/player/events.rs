@@ -6,10 +6,13 @@ use bevy::{
     },
     log::warn,
     picking::events::PointerClick,
-    state::state::State,
+    scene::CommandsSceneExt,
+    state::{commands::CommandsStatesExt, state::State},
 };
 
 use crate::game::{
+    card::components::{Card, CardSymbol},
+    color_selector::spawn_color_select,
     game_manager::{components::GamePhase, events::ActionIntent},
     player::components::{PlayerTurn, PlayerType},
 };
@@ -19,6 +22,7 @@ pub fn on_player_click_card(
     mut commands: Commands,
     game_phase: Res<State<GamePhase>>,
     player: Query<&PlayerType, With<PlayerTurn>>,
+    cards: Query<&Card>,
 ) {
     if *game_phase.get() != GamePhase::WaitingForInput {
         return;
@@ -33,7 +37,18 @@ pub fn on_player_click_card(
         return;
     }
 
+    let card_entity = on.original_event_target();
+    let Ok(card) = cards.get(card_entity) else {
+        return;
+    };
+
+    if card.symbol == CardSymbol::Plus4 || card.symbol == CardSymbol::Color {
+        commands.set_state(GamePhase::WaitingColorSelect);
+        commands.spawn_scene(spawn_color_select(card_entity));
+        return;
+    }
+
     commands.trigger(ActionIntent::Card {
-        next_card: on.original_event_target(),
+        next_card: card_entity,
     });
 }

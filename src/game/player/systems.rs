@@ -17,7 +17,7 @@ use bevy::{
 use rand::random_range;
 
 use crate::game::{
-    card::components::Card,
+    card::components::{Card, CardColor, CardSymbol},
     discard_pile::components::DiscardPile,
     game_manager::{
         components::{GameManager, GamePhase},
@@ -80,11 +80,14 @@ pub fn orgazine_player_hand(
     }
 }
 
+type PcPlayerPlayPlayer<'w, 's> =
+    Single<'w, 's, (&'static mut PlayerType, &'static Children), (With<Player>, With<PlayerTurn>)>;
+
 pub fn pc_player_play(
     mut commands: Commands,
     time: Res<Time>,
-    player: Single<(&mut PlayerType, &Children), (With<Player>, With<PlayerTurn>)>,
-    cards: Query<&Card>,
+    player: PcPlayerPlayPlayer,
+    mut cards: Query<&mut Card>,
     discard_pile: Single<&DiscardPile>,
 ) {
     let (mut player_type, children) = player.into_inner();
@@ -116,7 +119,8 @@ pub fn pc_player_play(
 
             Some((entity, card))
         })
-        .filter(|(_, card)| card.check_card(last_card))
+        .filter(|(_, card)| last_card.check_card(card))
+        .map(|(entity, _)| entity)
         .collect::<Vec<_>>();
 
     if my_cards.is_empty() {
@@ -124,9 +128,17 @@ pub fn pc_player_play(
         return;
     }
 
-    let Some((entity, _)) = my_cards.get(random_range(0..my_cards.len())) else {
+    let Some(entity) = my_cards.get(random_range(0..my_cards.len())) else {
         return;
     };
+
+    let Ok(mut card) = cards.get_mut(**entity) else {
+        return;
+    };
+
+    if card.symbol == CardSymbol::Plus4 || card.symbol == CardSymbol::Color {
+        card.color = CardColor::from(random_range(0..4));
+    }
 
     commands.trigger(ActionIntent::Card {
         next_card: entity.entity(),

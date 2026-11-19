@@ -84,6 +84,10 @@ impl Card {
             return false;
         }
 
+        if next_card.symbol == CardSymbol::Plus4 || next_card.symbol == CardSymbol::Color {
+            return true;
+        }
+
         if self.color == next_card.color {
             return true;
         }
@@ -92,10 +96,21 @@ impl Card {
             return true;
         }
 
-        if next_card.color == CardColor::Black {
-            return true;
-        }
-
         false
     }
+}
+
+#[test]
+fn feature_check_card() {
+    let last_card = Card {
+        color: CardColor::Yellow,
+        symbol: CardSymbol::Four,
+    };
+
+    let next_card = Card {
+        color: CardColor::Green,
+        symbol: CardSymbol::Plus4,
+    };
+
+    assert!(last_card.check_card(&next_card))
 }

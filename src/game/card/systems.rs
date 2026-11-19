@@ -1,6 +1,6 @@
 use bevy::{
     ecs::{
-        query::{Changed, With},
+        query::{Changed, Or},
         system::Query,
     },
     sprite::Sprite,
@@ -12,7 +12,7 @@ type ChangeCardVisibilityCardQuery<'w, 's> = Query<
     'w,
     's,
     (&'static Card, &'static CardVisibility, &'static mut Sprite),
-    (With<Card>, Changed<CardVisibility>),
+    Or<(Changed<CardVisibility>, Changed<Card>)>,
 >;
 
 pub fn change_card_visibility(mut card: ChangeCardVisibilityCardQuery) {

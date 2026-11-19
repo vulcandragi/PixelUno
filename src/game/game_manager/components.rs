@@ -14,6 +14,7 @@ pub enum GamePhase {
     DistributeCards,
     PassingTurn,
     WaitingForInput,
+    WaitingColorSelect,
 }
 
 #[derive(Resource, Default, Reflect)]

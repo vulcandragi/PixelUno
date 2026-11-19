@@ -1,4 +1,5 @@
 pub mod card;
+pub mod color_selector;
 pub mod deck;
 pub mod discard_pile;
 pub mod game_manager;

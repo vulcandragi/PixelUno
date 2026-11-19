@@ -45,7 +45,9 @@ pub fn on_action_intent(
 ) {
     info!("{:?}", on);
 
-    if *param.game_phase != GamePhase::WaitingForInput {
+    if *param.game_phase != GamePhase::WaitingForInput
+        && *param.game_phase != GamePhase::WaitingColorSelect
+    {
         return;
     }
 
