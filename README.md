@@ -9,11 +9,11 @@
 
 ## Etapa 2
 
-- [ ] Base da UI
+- [x] Base da UI
 - [x] Player Name
 - [x] Fake Player
 - [x] Turno
-- [ ] Cartas de Ação
+- [x] Cartas de Ação
 - [ ] Gerar Novo Deck
 
 ## Etapa 3
