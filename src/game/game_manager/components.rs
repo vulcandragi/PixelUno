@@ -12,7 +12,6 @@ pub enum GamePhase {
     None,
     RegisterPlayers,
     DistributeCards,
-    PassingTurn,
     WaitingForInput,
     WaitingColorSelect,
 }

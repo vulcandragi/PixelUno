@@ -1,14 +1,13 @@
 use bevy::{
     ecs::system::{Commands, Query, Single},
     scene::CommandsSceneExt,
-    state::commands::CommandsStatesExt,
 };
 
 use crate::game::{
     card::{components::CardVisibility, spawn_card},
     deck::components::Deck,
     discard_pile::components::DiscardPile,
-    game_manager::components::GamePhase,
+    game_manager::events::PassTurn,
     hand::components::Hand,
     player::components::{Player, PlayerType},
 };
@@ -52,5 +51,5 @@ pub fn distribute_cards(
             .id(),
     );
 
-    commands.set_state(GamePhase::PassingTurn);
+    commands.trigger(PassTurn(1));
 }

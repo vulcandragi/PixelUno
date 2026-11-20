@@ -25,8 +25,7 @@ use crate::{
         discard_pile::{spawn_discard_pile, systems::random_direction},
         game_manager::{
             components::{GameManager, GamePhase},
-            events::on_action_intent,
-            system::passing_turn,
+            events::{on_action_intent, on_pass_turn},
         },
         hand::systems::orgazine_player_hand,
         player::{
@@ -54,7 +53,6 @@ impl Plugin for GamePlugin {
         .add_systems(OnEnter(AppState::Game), setup)
         .add_systems(OnEnter(GamePhase::RegisterPlayers), register_players)
         .add_systems(OnEnter(GamePhase::DistributeCards), distribute_cards)
-        .add_systems(OnEnter(GamePhase::PassingTurn), passing_turn)
         .add_systems(
             Update,
             (
@@ -69,7 +67,8 @@ impl Plugin for GamePlugin {
             FixedUpdate,
             (pc_player_play).run_if(in_state(AppState::Game)),
         )
-        .add_observer(on_action_intent);
+        .add_observer(on_action_intent)
+        .add_observer(on_pass_turn);
     }
 }
 

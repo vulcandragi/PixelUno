@@ -13,14 +13,14 @@ use bevy::{
 
 use crate::game::{
     card::{
-        components::{Card, CardVisibility},
+        components::{Card, CardSymbol, CardVisibility},
         spawn_card,
     },
     deck::components::Deck,
     discard_pile::components::DiscardPile,
     game_manager::components::{GameManager, GamePhase},
     hand::components::Hand,
-    player::components::{Player, PlayerType},
+    player::components::{Player, PlayerTurn, PlayerType},
 };
 
 #[derive(Event, Debug)]
@@ -28,6 +28,9 @@ pub enum ActionIntent {
     Card { next_card: Entity },
     Buy,
 }
+
+#[derive(Event, Debug)]
+pub struct PassTurn(pub u8);
 
 #[derive(SystemParam)]
 pub struct OnActionIntentParam<'w, 's> {
@@ -110,6 +113,15 @@ pub fn on_action_intent(
             discard_pile.last_card = Some(next_card_entity);
 
             RelationshipSourceCollection::remove(&mut hand.cards, next_card_entity);
+
+            match next_card.symbol {
+                CardSymbol::Block => {
+                    commands.trigger(PassTurn(2));
+                }
+                _ => {
+                    commands.trigger(PassTurn(1));
+                }
+            }
         }
         ActionIntent::Buy => {
             let amount = param.deck.buy_amount.unwrap_or(1);
@@ -134,8 +146,33 @@ pub fn on_action_intent(
             }
 
             param.deck.buy_amount = None;
+
+            commands.trigger(PassTurn(1));
         }
     };
+}
 
-    commands.set_state(GamePhase::PassingTurn);
+pub fn on_pass_turn(
+    on: On<PassTurn>,
+    mut commands: Commands,
+    mut game_manager: ResMut<GameManager>,
+) {
+    if let Some(current_player) = game_manager.current_player {
+        commands.entity(current_player).remove::<PlayerTurn>();
+    };
+
+    for _ in 0..on.0 {
+        if game_manager.advance_turn().is_none() {
+            warn!("Fail pass the turn");
+            return;
+        };
+    }
+
+    let Some(current_player) = game_manager.current_player else {
+        return;
+    };
+
+    commands.entity(current_player).insert(PlayerTurn);
+
+    commands.set_state(GamePhase::WaitingForInput);
 }
