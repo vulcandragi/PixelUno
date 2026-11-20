@@ -49,7 +49,7 @@ pub fn spawn_pc_player(number: i32) -> impl Scene {
         #Player
         Player {
             name: {name.clone()},
-            hand: #Hand
+            hand: #Hand,
         }
         PlayerType::Pc { timer: timer }
         Transform::from_xyz(x, 200., 0.)
@@ -67,7 +67,9 @@ pub fn spawn_pc_player(number: i32) -> impl Scene {
             )
             --
             #PlayerCardCount
-            PlayerCardCount
+            PlayerCardCount {
+                hand: #Hand
+            }
             @spawn_plate(
                 "0".into(),
                 Vec3::new(20., -40., 1000.),
@@ -96,8 +98,6 @@ fn spawn_plate(text: String, offset: Vec3, size: Vec2) -> impl Scene {
                 ..Default::default()
             })
         })
-        Children [
-            Text2d::new(text)
-        ]
+        Text2d::new(text)
     }
 }

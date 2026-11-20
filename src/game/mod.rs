@@ -31,7 +31,7 @@ use crate::{
         hand::systems::orgazine_player_hand,
         player::{
             components::PlayerAssets,
-            systems::{pc_player_play, register_players},
+            systems::{pc_player_play, register_players, update_player_card_count},
         },
         table::{components::TableAssets, spawn_table},
     },
@@ -61,6 +61,7 @@ impl Plugin for GamePlugin {
                 orgazine_player_hand,
                 change_card_visibility,
                 random_direction,
+                update_player_card_count,
             )
                 .run_if(in_state(AppState::Game)),
         )

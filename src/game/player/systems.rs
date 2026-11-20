@@ -3,16 +3,14 @@ use std::collections::VecDeque;
 use bevy::{
     ecs::{
         entity::ContainsEntity,
-        hierarchy::Children,
         query::{Changed, With},
         relationship::RelationshipSourceCollection,
         system::{Commands, Query, Res, ResMut, Single},
     },
-    math::Vec3,
     scene::CommandsSceneExt,
+    sprite::Text2d,
     state::commands::CommandsStatesExt,
     time::Time,
-    transform::components::Transform,
 };
 use rand::random_range;
 
@@ -26,7 +24,7 @@ use crate::game::{
     },
     hand::components::Hand,
     player::{
-        components::{Player, PlayerTurn, PlayerType},
+        components::{Player, PlayerCardCount, PlayerTurn, PlayerType},
         spawn_local_player, spawn_pc_player,
     },
 };
@@ -49,10 +47,16 @@ pub fn register_players(mut commands: Commands, mut game_manager: ResMut<GameMan
 }
 
 pub fn update_player_card_count(
-    players: Query<&Children, (With<Player>, Changed<Children>)>,
-    cards: Query<&Card>,
+    hands: Query<&Hand, Changed<Hand>>,
+    mut player_card_count: Query<(&PlayerCardCount, &mut Text2d)>,
 ) {
-    for card_entities in players.iter() {}
+    for (player_card_count, mut text) in player_card_count.iter_mut() {
+        let Ok(hand) = hands.get(player_card_count.hand) else {
+            continue;
+        };
+
+        text.0 = format!("{0}", hand.cards.len());
+    }
 }
 
 pub fn pc_player_play(

@@ -17,7 +17,9 @@ pub struct Player {
 pub struct PlayerName;
 
 #[derive(Component, FromTemplate, Reflect)]
-pub struct PlayerCardCount;
+pub struct PlayerCardCount {
+    pub hand: Entity,
+}
 
 #[derive(Resource, AssetCollection)]
 pub struct PlayerAssets {
