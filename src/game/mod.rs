@@ -3,6 +3,7 @@ pub mod color_selector;
 pub mod deck;
 pub mod discard_pile;
 pub mod game_manager;
+pub mod hand;
 pub mod player;
 pub mod table;
 
@@ -27,9 +28,10 @@ use crate::{
             events::on_action_intent,
             system::passing_turn,
         },
+        hand::systems::orgazine_player_hand,
         player::{
             components::PlayerAssets,
-            systems::{orgazine_player_hand, pc_player_play, register_players},
+            systems::{pc_player_play, register_players},
         },
         table::{components::TableAssets, spawn_table},
     },

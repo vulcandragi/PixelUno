@@ -3,7 +3,7 @@ use bevy::{
         entity::Entity,
         event::Event,
         observer::On,
-        query::With,
+        relationship::RelationshipSourceCollection,
         system::{Commands, Query, Res, ResMut, Single, SystemParam},
     },
     log::{info, warn},
@@ -19,6 +19,7 @@ use crate::game::{
     deck::components::Deck,
     discard_pile::components::DiscardPile,
     game_manager::components::{GameManager, GamePhase},
+    hand::components::Hand,
     player::components::{Player, PlayerType},
 };
 
@@ -35,7 +36,8 @@ pub struct OnActionIntentParam<'w, 's> {
     pub discard_pile: Single<'w, 's, (Entity, &'static mut DiscardPile)>,
     pub deck: Single<'w, 's, &'static mut Deck>,
     pub cards: Query<'w, 's, &'static Card>,
-    pub players: Query<'w, 's, &'static PlayerType, With<Player>>,
+    pub players: Query<'w, 's, (&'static Player, &'static PlayerType)>,
+    pub hands: Query<'w, 's, &'static mut Hand>,
 }
 
 pub fn on_action_intent(
@@ -50,6 +52,21 @@ pub fn on_action_intent(
     {
         return;
     }
+
+    let Some(player_entity) = param.game_manager.current_player else {
+        warn!("Current player not set");
+        return;
+    };
+
+    let Ok((player, player_type)) = param.players.get(player_entity) else {
+        warn!("Player not found");
+        return;
+    };
+
+    let Ok(mut hand) = param.hands.get_mut(player.hand) else {
+        warn!("Hand not found");
+        return;
+    };
 
     match *on {
         ActionIntent::Card {
@@ -78,34 +95,45 @@ pub fn on_action_intent(
                 return;
             }
 
+            if param.deck.buy_amount.is_some() && !card.check_plus(next_card) {
+                commands.set_state(GamePhase::WaitingForInput);
+                return;
+            }
+
+            if next_card.is_plus() {
+                param.deck.buy_amount = Some(param.deck.buy_amount.unwrap_or(0) + next_card.plus())
+            }
+
             commands
                 .entity(discard_pile_entity)
                 .add_child(next_card_entity);
             discard_pile.last_card = Some(next_card_entity);
+
+            RelationshipSourceCollection::remove(&mut hand.cards, next_card_entity);
         }
         ActionIntent::Buy => {
-            let Some(player_entity) = param.game_manager.current_player else {
-                warn!("Current player not set");
-                return;
-            };
+            let amount = param.deck.buy_amount.unwrap_or(1);
 
-            let Ok(player_type) = param.players.get(player_entity) else {
-                warn!("Player not found");
-                return;
-            };
+            for _ in 0..amount {
+                let Some(card) = param.deck.get_card() else {
+                    warn!("Deck is empty");
+                    return;
+                };
 
-            let Some(card) = param.deck.get_card() else {
-                warn!("Deck is empty");
-                return;
-            };
+                info!("{card:?}");
 
-            let card_visibility = match player_type {
-                PlayerType::Local => CardVisibility::FaceUp,
-                PlayerType::Pc { timer: _ } => CardVisibility::FaceDown,
-            };
+                let card_visibility = match player_type {
+                    PlayerType::Local => CardVisibility::FaceUp,
+                    PlayerType::Pc { timer: _ } => CardVisibility::FaceDown,
+                };
 
-            let card_entity = commands.spawn_scene(spawn_card(card, card_visibility)).id();
-            commands.entity(player_entity).add_child(card_entity);
+                let card_entity = commands.spawn_scene(spawn_card(card, card_visibility)).id();
+                commands.entity(player.hand).add_child(card_entity);
+
+                hand.cards.push(card_entity);
+            }
+
+            param.deck.buy_amount = None;
         }
     };
 

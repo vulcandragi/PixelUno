@@ -18,19 +18,18 @@ use rand::random_range;
 
 use crate::game::{
     card::components::{Card, CardColor, CardSymbol},
+    deck::components::Deck,
     discard_pile::components::DiscardPile,
     game_manager::{
         components::{GameManager, GamePhase},
         events::ActionIntent,
     },
+    hand::components::Hand,
     player::{
         components::{Player, PlayerTurn, PlayerType},
         spawn_local_player, spawn_pc_player,
     },
 };
-
-type OrgazinePlayerHandPlayerQuery<'w, 's> =
-    Query<'w, 's, (&'static PlayerType, &'static Children), (With<Player>, Changed<Children>)>;
 
 pub fn register_players(mut commands: Commands, mut game_manager: ResMut<GameManager>) {
     let mut players = Vec::new();
@@ -49,48 +48,23 @@ pub fn register_players(mut commands: Commands, mut game_manager: ResMut<GameMan
     commands.set_state(GamePhase::DistributeCards);
 }
 
-pub fn orgazine_player_hand(
-    players: OrgazinePlayerHandPlayerQuery,
-    mut cards: Query<(&Card, &mut Transform)>,
+pub fn update_player_card_count(
+    players: Query<&Children, (With<Player>, Changed<Children>)>,
+    cards: Query<&Card>,
 ) {
-    for (player_type, card_entities) in players.iter() {
-        if *player_type != PlayerType::Local {
-            continue;
-        }
-
-        let card_count = card_entities.iter().count();
-        let off_set = ((card_count as f32 * 60.) / 2.) + 30.;
-
-        let mut sorted_cards = card_entities.iter().copied().collect::<Vec<_>>();
-
-        sorted_cards
-            .sort_by_key(|entity| cards.get(*entity).map_or(0, |(card, _)| card.get_index()));
-
-        for (index, card_entity) in sorted_cards.iter().enumerate() {
-            let Ok((card, mut transform)) = cards.get_mut(card_entity) else {
-                continue;
-            };
-
-            transform.translation = Vec3 {
-                x: (-off_set) + (60. * (index + 1) as f32),
-                z: card.get_index() as f32,
-                ..Default::default()
-            };
-        }
-    }
+    for card_entities in players.iter() {}
 }
-
-type PcPlayerPlayPlayer<'w, 's> =
-    Single<'w, 's, (&'static mut PlayerType, &'static Children), (With<Player>, With<PlayerTurn>)>;
 
 pub fn pc_player_play(
     mut commands: Commands,
     time: Res<Time>,
-    player: PcPlayerPlayPlayer,
+    player: Single<(&Player, &mut PlayerType), With<PlayerTurn>>,
+    hands: Query<&Hand>,
     mut cards: Query<&mut Card>,
     discard_pile: Single<&DiscardPile>,
+    deck: Single<&Deck>,
 ) {
-    let (mut player_type, children) = player.into_inner();
+    let (player, mut player_type) = player.into_inner();
 
     let PlayerType::Pc { timer } = &mut *player_type else {
         return;
@@ -102,6 +76,10 @@ pub fn pc_player_play(
         return;
     }
 
+    let Ok(hand) = hands.get(player.hand) else {
+        return;
+    };
+
     let Some(last_card_entity) = discard_pile.last_card else {
         return;
     };
@@ -110,16 +88,23 @@ pub fn pc_player_play(
         return;
     };
 
-    let my_cards = children
+    let my_cards = hand
+        .cards
         .iter()
         .filter_map(|entity| {
-            let Ok(card) = cards.get(*entity) else {
+            let Ok(card) = cards.get(entity) else {
                 return None;
             };
 
             Some((entity, card))
         })
-        .filter(|(_, card)| last_card.check_card(card))
+        .filter(|(_, card)| {
+            if deck.buy_amount.is_some() {
+                last_card.check_plus(card)
+            } else {
+                last_card.check_card(card)
+            }
+        })
         .map(|(entity, _)| entity)
         .collect::<Vec<_>>();
 
@@ -132,7 +117,7 @@ pub fn pc_player_play(
         return;
     };
 
-    let Ok(mut card) = cards.get_mut(**entity) else {
+    let Ok(mut card) = cards.get_mut(*entity) else {
         return;
     };
 

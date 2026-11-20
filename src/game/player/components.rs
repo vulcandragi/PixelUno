@@ -1,24 +1,28 @@
 use bevy::{
     asset::Handle,
-    ecs::{component::Component, entity::Entity, resource::Resource},
+    ecs::{component::Component, entity::Entity, resource::Resource, template::FromTemplate},
     image::Image,
     reflect::Reflect,
     time::Timer,
 };
 use bevy_asset_loader::asset_collection::AssetCollection;
 
-#[derive(Component, Clone, Default, Reflect)]
+#[derive(Component, FromTemplate, Reflect)]
 pub struct Player {
-    pub cards: Vec<Entity>,
+    pub name: String,
+    pub hand: Entity,
 }
 
-#[derive(Component, Clone, Default, Reflect)]
+#[derive(Component, FromTemplate, Reflect)]
 pub struct PlayerName;
+
+#[derive(Component, FromTemplate, Reflect)]
+pub struct PlayerCardCount;
 
 #[derive(Resource, AssetCollection)]
 pub struct PlayerAssets {
-    #[asset(path = "images/player_menu_name.png")]
-    pub menu_name: Handle<Image>,
+    #[asset(path = "images/player_plate.png")]
+    pub plate: Handle<Image>,
 }
 
 #[derive(Component, Clone, Default, Reflect, PartialEq)]

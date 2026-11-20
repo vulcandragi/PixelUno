@@ -1,8 +1,5 @@
 use bevy::{
-    ecs::{
-        entity::Entity,
-        system::{Commands, Query, Single},
-    },
+    ecs::system::{Commands, Query, Single},
     scene::CommandsSceneExt,
     state::commands::CommandsStatesExt,
 };
@@ -12,19 +9,25 @@ use crate::game::{
     deck::components::Deck,
     discard_pile::components::DiscardPile,
     game_manager::components::GamePhase,
+    hand::components::Hand,
     player::components::{Player, PlayerType},
 };
 
 pub fn distribute_cards(
     mut commands: Commands,
     mut deck: Single<&mut Deck>,
-    mut players: Query<(Entity, &mut Player, &PlayerType)>,
+    mut players: Query<(&Player, &PlayerType)>,
     mut discard_pile: Single<&mut DiscardPile>,
+    mut hands: Query<&mut Hand>,
 ) {
     for _ in 0..7 {
-        for (player_entity, mut player, player_type) in players.iter_mut() {
+        for (player, player_type) in players.iter_mut() {
             let Some(card) = deck.cards.pop_back() else {
                 break;
+            };
+
+            let Ok(mut hand) = hands.get_mut(player.hand) else {
+                continue;
             };
 
             let card_visibility = match player_type {
@@ -33,9 +36,9 @@ pub fn distribute_cards(
             };
 
             let card_entity = commands.spawn_scene(spawn_card(card, card_visibility)).id();
-            commands.entity(player_entity).add_child(card_entity);
+            commands.entity(player.hand).add_child(card_entity);
 
-            player.cards.push(card_entity);
+            hand.cards.push(card_entity);
         }
     }
 

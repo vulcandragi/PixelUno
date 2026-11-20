@@ -98,6 +98,26 @@ impl Card {
 
         false
     }
+
+    pub fn check_plus(&self, next_card: &Card) -> bool {
+        if !next_card.is_plus() || !self.is_plus() {
+            return false;
+        }
+
+        u8::from(self.symbol) <= u8::from(next_card.symbol)
+    }
+
+    pub fn is_plus(&self) -> bool {
+        self.symbol == CardSymbol::Plus2 || self.symbol == CardSymbol::Plus4
+    }
+
+    pub fn plus(&self) -> u8 {
+        match self.symbol {
+            CardSymbol::Plus2 => 2,
+            CardSymbol::Plus4 => 4,
+            _ => 0,
+        }
+    }
 }
 
 #[test]

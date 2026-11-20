@@ -14,6 +14,7 @@ use crate::game::card::components::{Card, CardColor, CardSymbol};
 #[derive(Component, Clone, Default, Reflect)]
 pub struct Deck {
     pub cards: VecDeque<Card>,
+    pub buy_amount: Option<u8>,
 }
 
 #[derive(Resource, AssetCollection)]
@@ -26,6 +27,7 @@ impl Deck {
     pub fn new() -> Self {
         Self {
             cards: generate_deck(),
+            ..Default::default()
         }
     }
 
