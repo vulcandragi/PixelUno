@@ -24,7 +24,7 @@ pub struct GameManager {
     pub current_player: Option<Entity>,
 }
 
-#[derive(Default, Clone, Reflect)]
+#[derive(Default, Clone, Reflect, PartialEq)]
 pub enum GameDirection {
     #[default]
     Clockwise,
@@ -56,5 +56,13 @@ impl GameManager {
         let next = self.peek_next_player()?;
         self.current_player = Some(next);
         Some(next)
+    }
+
+    pub fn reverse(&mut self) {
+        self.direction = if self.direction == GameDirection::Clockwise {
+            GameDirection::CounterClockwise
+        } else {
+            GameDirection::Clockwise
+        }
     }
 }

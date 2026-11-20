@@ -115,6 +115,10 @@ pub fn on_action_intent(
             RelationshipSourceCollection::remove(&mut hand.cards, next_card_entity);
 
             match next_card.symbol {
+                CardSymbol::Reverse => {
+                    param.game_manager.reverse();
+                    commands.trigger(PassTurn(1));
+                }
                 CardSymbol::Block => {
                     commands.trigger(PassTurn(2));
                 }
