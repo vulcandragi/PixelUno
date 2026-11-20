@@ -1,0 +1,5 @@
+[target.x86_64-pc-windows-gnu]
+pre-build = [
+    "echo 'LIBRARY synchronization.dll\nEXPORTS\nWaitOnAddress\nWakeByAddressAll\nWakeByAddressSingle' > /tmp/synchronization.def",
+    "x86_64-w64-mingw32-dlltool -d /tmp/synchronization.def -l /usr/x86_64-w64-mingw32/lib/libsynchronization.a"
+]
